@@ -14,6 +14,7 @@ class Credito extends Model
         'tipo',
         'estado',
         'observaciones',
+        'url_archivo',
     ];
 
     public function historial(): HasMany
