@@ -22,8 +22,6 @@ class SystemController extends Controller
         Log::info('System reset requested');
 
         try {
-            DB::beginTransaction();
-            
             // Disable foreign key checks to allow truncation
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
@@ -37,8 +35,6 @@ class SystemController extends Controller
             // Re-enable foreign key checks
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-            DB::commit();
-
             Log::info('System reset successful');
 
             return response()->json([
@@ -47,7 +43,8 @@ class SystemController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            DB::rollBack();
+            // Ensure foreign key checks are re-enabled even on failure
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
             Log::error('System reset failed: ' . $e->getMessage());
 
             return response()->json([

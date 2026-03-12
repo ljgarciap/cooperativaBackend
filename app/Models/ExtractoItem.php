@@ -17,6 +17,11 @@ class ExtractoItem extends Model
         'color',
     ];
 
+    protected $casts = [
+        'conciliado' => 'boolean',
+        'valor' => 'float',
+    ];
+
     public function conciliacion(): BelongsTo
     {
         return $this->belongsTo(Conciliacion::class);

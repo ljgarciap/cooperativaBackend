@@ -21,9 +21,14 @@ class N8nWebhookController extends Controller
      */
     public function receive(Request $request)
     {
-        Log::info('N8n Webhook direct incoming data:', $request->all());
+        $data = $request->all();
         
-        $result = $this->storeCreditRecord($request->all());
+        // Normalize array-wrapped data from n8n
+        if (is_array($data) && isset($data[0]) && is_array($data[0])) {
+            $data = $data[0];
+        }
+        
+        $result = $this->storeCreditRecord($data);
 
         if (isset($result['status']) && $result['status'] === 'error') {
             return response()->json($result, 422);
@@ -325,8 +330,12 @@ class N8nWebhookController extends Controller
 
             $extractedData = json_decode($response->body(), true);
             
-            if (is_array($extractedData) && isset($extractedData[0]) && is_array($extractedData[0])) {
+            // Normalize array or nested data
+            if (is_array($extractedData) && isset($extractedData[0])) {
                 $extractedData = $extractedData[0];
+            }
+            if (isset($extractedData['data']) && is_array($extractedData['data'])) {
+                $extractedData = $extractedData['data'];
             }
 
             if ($response->status() >= 400 || (isset($extractedData['status']) && $extractedData['status'] === 'error')) {
@@ -334,10 +343,20 @@ class N8nWebhookController extends Controller
             }
 
             $extractedData['url_archivo'] = $fileUrl;
-            $extractedData['nombre_archivo'] = $request->nombre_archivo;
-            $credito = $this->storeCreditRecord($extractedData);
+            $extractedData['nombre_archivo'] = $fileName; // Use the local saved filename for consistency
+            
+            $skipSave = $request->skip_save === 'true' || $request->skip_save === true;
 
-            return $this->corsResponse($extractedData, 201);
+            $result = $extractedData;
+            if (!$skipSave) {
+                $result = $this->storeCreditRecord($extractedData);
+            }
+
+            return $this->corsResponse([
+                'status' => 'success',
+                'message' => $skipSave ? 'Extracción exitosa' : 'Documento procesado y guardado',
+                'data' => $result
+            ], 200);
 
         } catch (\Exception $e) {
             Log::error('Proxy PDF Error: ' . $e->getMessage());

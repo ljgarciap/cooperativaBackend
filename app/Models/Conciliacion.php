@@ -34,15 +34,40 @@ class Conciliacion extends Model
         $extractos = $this->extractoItems()->where('conciliado', false)->get();
         $auxiliares = $this->auxiliarItems()->where('conciliado', false)->get();
 
+        // PHASE 1: Match by Value + Reference (Strongest Match)
         foreach ($extractos as $ext) {
             foreach ($auxiliares as $aux) {
                 if ($aux->conciliado) continue;
 
-                // Match by value and date (simple version)
-                if ($ext->valor == $aux->valor && $ext->fecha == $aux->fecha) {
+                $refExt = trim(strtolower($ext->referencia ?? ''));
+                $refAux = trim(strtolower($aux->referencia ?? $aux->identificacion ?? ''));
+
+                if ($ext->valor == $aux->valor && !empty($refExt) && $refExt === $refAux) {
                     $ext->update(['conciliado' => true]);
                     $aux->update(['conciliado' => true]);
-                    continue 2; // Move to next extracto item
+                    continue 2;
+                }
+            }
+        }
+
+        // Refresh pending lists for Phase 2
+        $extractos = $this->extractoItems()->where('conciliado', false)->get();
+        $auxiliares = $this->auxiliarItems()->where('conciliado', false)->get();
+
+        // PHASE 2: Match by Value + Date Margin (+/- 3 days)
+        foreach ($extractos as $ext) {
+            foreach ($auxiliares as $aux) {
+                if ($aux->conciliado) continue;
+
+                if ($ext->valor == $aux->valor) {
+                    $fechaExt = \Carbon\Carbon::parse($ext->fecha);
+                    $fechaAux = \Carbon\Carbon::parse($aux->fecha);
+                    
+                    if ($fechaExt->diffInDays($fechaAux) <= 3) {
+                        $ext->update(['conciliado' => true]);
+                        $aux->update(['conciliado' => true]);
+                        continue 2;
+                    }
                 }
             }
         }
