@@ -10,6 +10,8 @@ class Credito extends Model
     protected $fillable = [
         'identificacion',
         'nombre',
+        'celular',
+        'correo',
         'monto',
         'tipo',
         'estado',

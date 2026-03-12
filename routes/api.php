@@ -8,10 +8,15 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post('/creditos', [N8nWebhookController::class, 'receive']);
-Route::get('/creditos', [N8nWebhookController::class, 'index']);
-Route::put('/creditos/{id}', [\App\Http\Controllers\CreditoController::class, 'update']);
-Route::delete('/creditos/{id}', [\App\Http\Controllers\CreditoController::class, 'destroy']);
+// Credits Routes
+Route::get('/creditos', [CreditoController::class, 'index']);
+Route::post('/creditos/upload', [CreditoController::class, 'upload']);
+Route::post('/creditos/{id}/approve', [CreditoController::class, 'approve']);
+Route::post('/creditos/{id}/reject', [CreditoController::class, 'reject']);
+Route::get('/creditos/{id}/download-pdf', [CreditoController::class, 'downloadPdf']);
+
+// System Routes
+Route::post('/system/reset', [SystemController::class, 'reset']);
 
 Route::post('/conciliaciones', [N8nWebhookController::class, 'receiveReconciliation']);
 Route::get('/conciliaciones', [N8nWebhookController::class, 'indexReconciliations']);

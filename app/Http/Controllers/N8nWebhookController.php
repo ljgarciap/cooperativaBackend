@@ -45,6 +45,8 @@ class N8nWebhookController extends Controller
 
         $identificacion = $data['identificacion'] ?? $data['Identificación'] ?? null;
         $nombre = $data['nombre'] ?? $data['Nombre'] ?? null;
+        $celular = $data['celular'] ?? $data['Celular'] ?? $data['CELULAR'] ?? null;
+        $correo = $data['correo'] ?? $data['Correo'] ?? $data['CORREO'] ?? null;
         $monto = $data['monto'] ?? $data['Monto'] ?? 0;
         $tipo = $data['tipo'] ?? $data['Tipo'] ?? 'DESCONOCIDO';
 
@@ -71,10 +73,12 @@ class N8nWebhookController extends Controller
             $credito = Credito::create([
                 'identificacion' => $identificacion,
                 'nombre' => $nombre,
+                'celular' => $celular,
+                'correo' => $correo,
                 'monto' => $monto,
                 'tipo' => $tipo,
                 'estado' => $data['estado'] ?? 'PENDIENTE_ANALISIS',
-                'observaciones' => $data['observaciones'] ?? 'Extraído via Proxy/n8n',
+                'observaciones' => $data['observaciones'] ?? 'Extraído por Agente IA',
                 'url_archivo' => $data['url_archivo'] ?? null,
             ]);
 
