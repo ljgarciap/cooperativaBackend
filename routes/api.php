@@ -32,7 +32,7 @@ Route::get('/conciliaciones/{id}', [N8nWebhookController::class, 'showReconcilia
 Route::post('/conciliaciones/{id}/run', [N8nWebhookController::class, 'runReconciliation']);
 
 Route::get('/bitacora', [N8nWebhookController::class, 'indexBitacora']);
-Route::post('/conciliaciones-batch', [N8nWebhookController::class, 'receiveConciliacionBatch']);
+Route::post('/conciliaciones-batch', [N8nWebhookController::class, 'receiveReconciliationBatch']);
 
 // Proxy routes for n8n to avoid CORS
 Route::post('/proxy-n8n/pdf', [N8nWebhookController::class, 'forwardToN8nPdf']);
