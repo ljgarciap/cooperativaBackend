@@ -360,11 +360,13 @@ class N8nWebhookController extends Controller
 
             // Call n8n (Pure Extraction)
             $n8nUrl = config('services.n8n.url') . '/webhook/credito-pdf';
-            $response = Http::timeout(300)->attach(
-                'data', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
-            )->post($n8nUrl, [
-                'nombre_archivo' => $request->nombre_archivo
-            ]);
+            $response = Http::withoutVerifying()
+                ->timeout(300)
+                ->attach(
+                    'data', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
+                )->post($n8nUrl, [
+                    'nombre_archivo' => $request->nombre_archivo
+                ]);
 
             Log::info('Response from n8n:', ['body' => $response->body(), 'status' => $response->status()]);
 
@@ -432,15 +434,17 @@ class N8nWebhookController extends Controller
 
             // Call n8n (Pattern Batches)
             $n8nUrl = config('services.n8n.url') . '/webhook/conciliacion-excel';
-            $response = Http::timeout(300)->attach(
-                'data', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
-            )->post($n8nUrl, [
-                'nombre_archivo' => $request->nombre_archivo,
-                'banco' => $request->banco,
-                'mes' => $request->mes,
-                'anio' => $request->anio,
-                'fuente' => $request->fuente // EXTRACTO or AUXILIAR
-            ]);
+            $response = Http::withoutVerifying()
+                ->timeout(300)
+                ->attach(
+                    'data', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
+                )->post($n8nUrl, [
+                    'nombre_archivo' => $request->nombre_archivo,
+                    'banco' => $request->banco,
+                    'mes' => $request->mes,
+                    'anio' => $request->anio,
+                    'fuente' => $request->fuente // EXTRACTO or AUXILIAR
+                ]);
 
             $responseData = $response->json();
             
