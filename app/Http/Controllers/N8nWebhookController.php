@@ -19,7 +19,17 @@ class N8nWebhookController extends Controller
     /**
      * Store credit data (General Entry Point).
      */
-    public function receive(Request $request)
+    /**
+     * @OA\Post(
+     *     path="/api/webhook/n8n/pdf",
+     *     summary="Webhook para recibir datos extraídos de PDF (n8n)",
+     *     tags={"Webhooks"},
+     *     @OA\RequestBody(required=true, @OA\JsonContent()),
+     *     @OA\Response(response=200, description="Dato guardado"),
+     *     @OA\Response(response=400, description="Error en validación")
+     * )
+     */
+    public function receiveCreditPdf(Request $request)
     {
         $data = $request->all();
         
@@ -180,7 +190,17 @@ class N8nWebhookController extends Controller
     /**
      * Receive batched rows from n8n.
      */
-    public function receiveConciliacionBatch(Request $request)
+    /**
+     * @OA\Post(
+     *     path="/api/conciliaciones-batch",
+     *     summary="Cargar lote de movimientos de conciliación",
+     *     tags={"Conciliación"},
+     *     @OA\RequestBody(required=true, @OA\JsonContent()),
+     *     @OA\Response(response=200, description="Lote procesado"),
+     *     @OA\Response(response=500, description="Error interno")
+     * )
+     */
+    public function receiveReconciliationBatch(Request $request)
     {
         Log::info('Conciliacion Batch Incoming:', $request->all());
         $data = $request->all();
@@ -302,6 +322,25 @@ class N8nWebhookController extends Controller
     /**
      * Proxy PDF to n8n.
      */
+    /**
+     * @OA\Post(
+     *     path="/api/proxy-n8n/pdf",
+     *     summary="Procesar PDF de solicitud de crédito",
+     *     tags={"Créditos"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="data", type="string", format="binary", description="Archivo PDF"),
+     *                 @OA\Property(property="nombre_archivo", type="string", description="Nombre personalizado del archivo")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="PDF procesado correctamente"),
+     *     @OA\Response(response=500, description="Error en el procesamiento")
+     * )
+     */
     public function forwardToN8nPdf(Request $request)
     {
         ini_set('max_execution_time', 300);
@@ -320,9 +359,10 @@ class N8nWebhookController extends Controller
             $fileUrl = Storage::url($filePath);
 
             // Call n8n (Pure Extraction)
+            $n8nUrl = config('services.n8n.url') . '/webhook/credito-pdf';
             $response = Http::timeout(300)->attach(
                 'data', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
-            )->post('http://localhost:5678/webhook/credito-pdf', [
+            )->post($n8nUrl, [
                 'nombre_archivo' => $request->nombre_archivo
             ]);
 
@@ -391,9 +431,10 @@ class N8nWebhookController extends Controller
             ]);
 
             // Call n8n (Pattern Batches)
+            $n8nUrl = config('services.n8n.url') . '/webhook/conciliacion-excel';
             $response = Http::timeout(300)->attach(
                 'data', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
-            )->post('http://localhost:5678/webhook/conciliacion-excel', [
+            )->post($n8nUrl, [
                 'nombre_archivo' => $request->nombre_archivo,
                 'banco' => $request->banco,
                 'mes' => $request->mes,

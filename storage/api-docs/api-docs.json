@@ -1,0 +1,118 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Cooperativa API",
+        "description": "API de servicios para el sistema de crédito y conciliación bancaria de la Cooperativa.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "Servidor de API"
+        }
+    ],
+    "paths": {
+        "/api/webhook/n8n/pdf": {
+            "post": {
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Webhook para recibir datos extraídos de PDF (n8n)",
+                "operationId": "51935a8bfcdf2a0eb41c38f2c9102f0c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Dato guardado"
+                    },
+                    "400": {
+                        "description": "Error en validación"
+                    }
+                }
+            }
+        },
+        "/api/conciliaciones-batch": {
+            "post": {
+                "tags": [
+                    "Conciliación"
+                ],
+                "summary": "Cargar lote de movimientos de conciliación",
+                "operationId": "af48d5416cdf4694061183b2e49abbf5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lote procesado"
+                    },
+                    "500": {
+                        "description": "Error interno"
+                    }
+                }
+            }
+        },
+        "/api/proxy-n8n/pdf": {
+            "post": {
+                "tags": [
+                    "Créditos"
+                ],
+                "summary": "Procesar PDF de solicitud de crédito",
+                "operationId": "242ba713770cd03f190901609010e4fe",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "data": {
+                                        "description": "Archivo PDF",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "nombre_archivo": {
+                                        "description": "Nombre personalizado del archivo",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "PDF procesado correctamente"
+                    },
+                    "500": {
+                        "description": "Error en el procesamiento"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Webhooks",
+            "description": "Webhooks"
+        },
+        {
+            "name": "Conciliación",
+            "description": "Conciliación"
+        },
+        {
+            "name": "Créditos",
+            "description": "Créditos"
+        }
+    ]
+}

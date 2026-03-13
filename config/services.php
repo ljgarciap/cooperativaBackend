@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'n8n' => [
+        'url' => env('N8N_URL', 'http://localhost:5678'),
+    ],
+
 ];
